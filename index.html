@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Digital Consumer Twin — Maya</title>
+<style>
+  :root {
+    --ink: #1C1917;
+    --ink-muted: #78716C;
+    --ink-faint: #A8A29E;
+    --paper: #FAFAF9;
+    --surface: #FFFFFF;
+    --border: #E7E5E4;
+    --border-strong: #D6D3D1;
+
+    --rose: #BE185D;
+    --rose-light: #FDF2F8;
+    --rose-mid: #FBCFE8;
+
+    --teal: #0F766E;
+    --teal-light: #F0FDFA;
+    --teal-mid: #99F6E4;
+
+    --amber: #B45309;
+    --amber-light: #FFFBEB;
+    --amber-mid: #FDE68A;
+
+    --slate: #475569;
+    --slate-light: #F8FAFC;
+    --slate-mid: #CBD5E1;
+
+    --green: #166534;
+    --green-light: #F0FDF4;
+
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0 10px;
+    gap: 16px;
+  }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .persona-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--rose-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: var(--rose);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .header-title { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+  .header-sub { font-size: 11px; color: var(--ink-muted); margin-top: 1px; }
+  .header-badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .badge {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.3px;
+    padding: 3px 8px; border-radius: 4px; text-transform: uppercase;
+  }
+  .badge-rose   { background: var(--rose-light);  color: var(--rose); }
+  .badge-teal   { background: var(--teal-light);  color: var(--teal); }
+  .badge-amber  { background: var(--amber-light); color: var(--amber); }
+  .badge-slate  { background: var(--slate-light); color: var(--slate); border: 1px solid var(--slate-mid); }
+
+  .tabs-row { display: flex; border-top: 1px solid var(--border); }
+  .tab-btn {
+    padding: 9px 18px; font-size: 12.5px; font-weight: 500;
+    color: var(--ink-muted); background: none; border: none;
+    border-bottom: 2.5px solid transparent; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; margin-bottom: -1px;
+    font-family: var(--font-body);
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--rose); border-bottom-color: var(--rose); }
+
+  /* ── LAYOUT ── */
+  .main { max-width: 1100px; margin: 0 auto; padding: 28px 32px 64px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── SHARED ── */
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 400;
+    color: var(--ink); letter-spacing: -0.3px;
+    margin-bottom: 6px; line-height: 1.3;
+  }
+  .section-body {
+    font-size: 13px; color: var(--ink-muted); line-height: 1.7;
+    max-width: 640px;
+  }
+  .divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .card-sm {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+
+  /* ── TAB 1: THE CASE ── */
+  .case-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 32px;
+    align-items: start;
+  }
+  .hero-left { }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--rose);
+    margin-bottom: 14px;
+  }
+  .hero-headline {
+    font-family: var(--font-display);
+    font-size: 28px; line-height: 1.25;
+    font-weight: 400; letter-spacing: -0.5px;
+    color: var(--ink); margin-bottom: 14px;
+  }
+  .hero-headline em { font-style: italic; color: var(--rose); }
+  .hero-body { font-size: 13.5px; color: var(--ink-muted); line-height: 1.75; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .stat-card.accent { background: var(--rose-light); border-color: var(--rose-mid); }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 400;
+    color: var(--rose); letter-spacing: -1px; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 11.5px; color: var(--ink-muted); line-height: 1.4; }
+
+  .problem-solution {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .ps-card {
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .ps-card.problem { background: #FFF7F7; border: 1px solid #FECACA; }
+  .ps-card.solution { background: var(--teal-light); border: 1px solid var(--teal-mid); }
+  .ps-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .ps-card.problem .ps-label { color: #DC2626; }
+  .ps-card.solution .ps-label { color: var(--teal); }
+  .ps-item { font-size: 12.5px; line-height: 1.6; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .ps-item:last-child { border-bottom: none; }
+  .ps-item::before { content: '— '; color: var(--ink-faint); }
+
+  .use-case-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .uc-card {
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .uc-icon { font-size: 20px; margin-bottom: 8px; }
+  .uc-name { font-size: 12.5px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .uc-desc { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; }
+  .uc-temp {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; margin-top: 8px;
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .temp-low  { background: var(--teal-light); color: var(--teal); }
+  .temp-mid  { background: var(--amber-light); color: var(--amber); }
+  .temp-high { background: var(--rose-light); color: var(--rose); }
+
+  /* ── TAB 2: HOW IT'S BUILT ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 28px;
+  }
+  .pipeline-step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 0 20px;
+    position: relative;
+  }
+  .pipeline-step:not(:last-child) .step-line { height: 100%; }
+  .step-left { display: flex; flex-direction: column; align-items: center; }
+  .step-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--rose);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .step-line {
+    width: 1px; background: var(--border-strong);
+    flex: 1; min-height: 24px;
+    margin-top: 0;
+  }
+  .step-right { padding: 6px 0 28px; }
+  .step-title { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .step-desc { font-size: 12.5px; color: var(--ink-muted); line-height: 1.6; margin-bottom: 6px; }
+  .step-analyst {
+    font-size: 11.5px; color: var(--rose);
+    font-style: italic;
+    padding: 5px 10px;
+    background: var(--rose-light);
+    border-radius: 5px;
+    border-left: 3px solid var(--rose-mid);
+    display: inline-block;
+  }
+
+  .temp-legend {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .temp-card {
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+  .temp-card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .temp-card-val { font-family: var(--font-mono); font-size: 22px; font-weight: 400; margin-bottom: 4px; }
+  .temp-card-desc { font-size: 11.5px; color: var(--ink-muted); line-height: 1.5; }
+  .temp-card.low  { background: var(--teal-light);  border-color: var(--teal-mid);  }
+  .temp-card.low  .temp-card-label { color: var(--teal); }
+  .temp-card.low  .temp-card-val   { color: var(--teal); }
+  .temp-card.mid  { background: var(--amber-light); border-color: var(--amber-mid); }
+  .temp-card.mid  .temp-card-label { color: var(--amber); }
+  .temp-card.mid  .temp-card-val   { color: var(--amber); }
+  .temp-card.high { background: var(--rose-light);  border-color: var(--rose-mid);  }
+  .temp-card.high .temp-card-label { color: var(--rose); }
+  .temp-card.high .temp-card-val   { color: var(--rose); }
+
+  /* ── TAB 3: ASK THE TWIN ── */
+  .twin-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .persona-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: sticky;
+    top: 100px;
+  }
+  .persona-card-header {
+    background: var(--rose-light);
+    border-bottom: 1px solid var(--rose-mid);
+    padding: 18px;
+    text-align: center;
+  }
+  .persona-card-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--rose-mid);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 24px; color: var(--rose); font-weight: 700;
+    margin: 0 auto 10px;
+  }
+  .persona-card-name { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+  .persona-card-meta { font-size: 11.5px; color: var(--ink-muted); }
+  .persona-card-body { padding: 16px 18px; }
+  .persona-trait {
+    display: flex; gap: 8px; padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .persona-trait:last-child { border-bottom: none; }
+  .trait-label { color: var(--ink-faint); font-weight: 600; min-width: 70px; flex-shrink: 0; }
+  .trait-val { color: var(--ink); }
+  .persona-studies {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .persona-studies-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
+  .study-tag {
+    display: inline-flex; margin: 2px 3px 2px 0;
+    font-size: 10.5px; font-weight: 600;
+    padding: 2px 7px; border-radius: 4px;
+    background: var(--slate-light); color: var(--slate);
+    border: 1px solid var(--slate-mid);
+  }
+
+  .qa-panel { }
+  .uc-tabs {
+    display: flex; gap: 0; margin-bottom: 20px;
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    width: fit-content;
+  }
+  .uc-tab {
+    padding: 8px 16px; font-size: 12px; font-weight: 600;
+    border: none; border-right: 1px solid var(--border);
+    background: var(--surface); color: var(--ink-muted);
+    cursor: pointer; font-family: var(--font-body);
+    transition: all 0.12s;
+  }
+  .uc-tab:last-child { border-right: none; }
+  .uc-tab.active { background: var(--rose); color: #fff; }
+  .uc-tab:hover:not(.active) { background: var(--rose-light); color: var(--rose); }
+
+  .temp-indicator {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; font-size: 12px;
+  }
+  .temp-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+  .temp-pill.low  { background: var(--teal-light); color: var(--teal); }
+  .temp-pill.mid  { background: var(--amber-light); color: var(--amber); }
+  .temp-pill.high { background: var(--rose-light); color: var(--rose); }
+  .temp-bar-wrap { flex: 1; max-width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .temp-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .temp-bar-fill.low  { background: var(--teal); }
+  .temp-bar-fill.mid  { background: var(--amber); }
+  .temp-bar-fill.high { background: var(--rose); }
+  .temp-note { font-size: 11px; color: var(--ink-faint); }
+
+  .questions-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .q-btn {
+    text-align: left; padding: 11px 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 12.5px; color: var(--ink);
+    cursor: pointer; font-family: var(--font-body);
+    transition: all 0.12s; line-height: 1.4;
+  }
+  .q-btn:hover { border-color: var(--rose-mid); background: var(--rose-light); color: var(--rose); }
+  .q-btn.active { border-color: var(--rose); background: var(--rose-light); color: var(--rose); font-weight: 600; }
+
+  .response-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: 200px;
+  }
+  .response-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--paper);
+  }
+  .response-who { font-size: 12px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+  .response-who-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rose); }
+  .confidence-tag {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+  }
+  .tag-grounded    { background: var(--teal-light);  color: var(--teal); }
+  .tag-extrapolated{ background: var(--amber-light); color: var(--amber); }
+  .tag-speculative { background: var(--rose-light);  color: var(--rose); }
+  .tag-outofscope  { background: var(--slate-light); color: var(--slate); border: 1px solid var(--slate-mid); }
+
+  .response-body { padding: 18px 20px; }
+  .response-quote {
+    font-size: 14px; line-height: 1.8; color: var(--ink);
+    font-style: italic;
+    border-left: 3px solid var(--rose-mid);
+    padding-left: 16px;
+    margin-bottom: 14px;
+  }
+  .response-translation {
+    font-size: 12px; color: var(--ink-muted); line-height: 1.6;
+    padding: 8px 12px; background: var(--paper);
+    border-radius: 6px; margin-bottom: 14px;
+  }
+  .response-translation strong { color: var(--ink); }
+  .analyst-note {
+    font-size: 11.5px; color: var(--ink-muted);
+    padding: 8px 12px;
+    background: var(--amber-light);
+    border-radius: 6px;
+    border-left: 3px solid var(--amber-mid);
+    line-height: 1.6;
+  }
+  .analyst-note strong { color: var(--amber); }
+  .response-empty {
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--ink-faint);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .response-empty-icon { font-size: 28px; margin-bottom: 10px; }
+
+  .api-note {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--slate-light);
+    border: 1px solid var(--slate-mid);
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  /* ── TAB 4: LIMITS ── */
+  .limits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .limit-card {
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1px solid;
+  }
+  .limit-card.cant  { background: #FFF7F7; border-color: #FECACA; }
+  .limit-card.watch { background: var(--amber-light); border-color: var(--amber-mid); }
+  .limit-card.when  { background: var(--teal-light); border-color: var(--teal-mid); }
+  .limit-card.how   { background: var(--slate-light); border-color: var(--slate-mid); }
+  .limit-card-title { font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+  .limit-card.cant  .limit-card-title { color: #DC2626; }
+  .limit-card.watch .limit-card-title { color: var(--amber); }
+  .limit-card.when  .limit-card-title { color: var(--teal); }
+  .limit-card.how   .limit-card-title { color: var(--slate); }
+  .limit-item {
+    font-size: 12px; color: var(--ink-muted); line-height: 1.6;
+    padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .limit-item:last-child { border-bottom: none; }
+  .limit-item::before { content: '· '; color: var(--ink-faint); }
+
+  .honesty-box {
+    background: var(--rose-light);
+    border: 1px solid var(--rose-mid);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .honesty-box strong { color: var(--rose); }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; font-size: 11px; color: var(--ink-faint);
+    padding: 16px 32px; border-top: 1px solid var(--border);
+    background: var(--surface); margin-top: 40px;
+  }
+
+  @media (max-width: 900px) {
+    .main { padding: 16px; }
+    .case-hero, .problem-solution, .twin-layout, .limits-grid { grid-template-columns: 1fr; }
+    .use-case-row, .temp-legend { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .persona-card { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="persona-avatar">M</div>
+      <div>
+        <div class="header-title">Digital Consumer Twin — Maya</div>
+        <div class="header-sub">Synthetic respondent · Beauty &amp; Personal Care · Built from real research transcripts</div>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-rose">Methodology explainer</span>
+      <span class="badge badge-teal">Live Q&amp;A demo</span>
+      <span class="badge badge-slate">Synthetic data</span>
+    </div>
+  </div>
+  <div class="tabs-row">
+    <button class="tab-btn active" onclick="showTab('case',this)">The case</button>
+    <button class="tab-btn" onclick="showTab('build',this)">How it's built</button>
+    <button class="tab-btn" onclick="showTab('twin',this)">Ask the twin</button>
+    <button class="tab-btn" onclick="showTab('limits',this)">Limitations</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 1: THE CASE
+════════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-case">
+
+  <div class="case-hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Digital Consumer Twins</div>
+      <div class="hero-headline">One research session,<br><em>permanently queryable.</em></div>
+      <div class="hero-body">
+        A consumer twin is an LLM-based synthetic persona built from a real research transcript — a shopalong, an in-depth interview, or both. Once built and validated, it can be queried across use cases that weren't in the original research brief: creative briefing, concept reaction, co-creation, strategy stress-testing.<br><br>
+        The twin doesn't replace research. It extends the shelf life of research that already happened.
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card accent">
+        <div class="stat-num">1</div>
+        <div class="stat-label">research session → reusable across multiple business questions</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-num">~70%</div>
+        <div class="stat-label">reduction in time-to-insight for exploratory questions vs new study</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3</div>
+        <div class="stat-label">temperature settings calibrated by use case type</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">0</div>
+        <div class="stat-label">new respondents needed to answer a follow-up question</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">The problem it solves</div>
+  <div class="problem-solution">
+    <div class="ps-card problem">
+      <div class="ps-label">Before — traditional research limits</div>
+      <div class="ps-item">New business question = new study brief = weeks of turnaround</div>
+      <div class="ps-item">Transcripts sit unused after the report is presented</div>
+      <div class="ps-item">Stakeholders can't access insights without analyst mediation</div>
+      <div class="ps-item">Follow-up questions require re-recruiting and re-fielding</div>
+      <div class="ps-item">Creative teams brief from summary decks, not actual consumer voice</div>
+    </div>
+    <div class="ps-card solution">
+      <div class="ps-label">After — with consumer twins</div>
+      <div class="ps-item">Exploratory questions answered in minutes, not weeks</div>
+      <div class="ps-item">Transcripts become living assets, not archive files</div>
+      <div class="ps-item">Stakeholders query twins self-serve with guided use-case prompts</div>
+      <div class="ps-item">Follow-ups answered immediately within the original research context</div>
+      <div class="ps-item">KOL briefs written from verbatim twin language, not deck summaries</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">What the twin can be used for</div>
+  <div style="margin-bottom:8px">
+    <div class="use-case-row">
+      <div class="uc-card">
+        <div class="uc-icon">🎙️</div>
+        <div class="uc-name">KOL &amp; Creative Briefing</div>
+        <div class="uc-desc">Pull exact consumer language for brief writing — how she describes a product, what bothers her, how she talks about it to friends. Verbatim-quality output.</div>
+        <div class="uc-temp temp-low">Low temp · Grounded</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-icon">💡</div>
+        <div class="uc-name">Concept &amp; Promo Reaction</div>
+        <div class="uc-desc">Show the twin a new concept, claim, or mechanic. She responds in character — flagged as extrapolated, not recalled. Directional, not conclusive.</div>
+        <div class="uc-temp temp-mid">Medium temp · Extrapolated</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-icon">✨</div>
+        <div class="uc-name">Co-creation &amp; Ideation</div>
+        <div class="uc-desc">Ask her to imagine, redesign, or wish for something. Higher temperature, clearly speculative. Useful for innovation territories and strategy stress-testing.</div>
+        <div class="uc-temp temp-high">High temp · Speculative</div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:11.5px;color:var(--ink-faint);margin-top:4px;">Temperature calibration by use case is the core guardrail design decision — see "How it's built" for the full framework.</div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 2: HOW IT'S BUILT
+════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-build">
+
+  <div class="section-label">The build pipeline</div>
+  <div class="section-title" style="margin-bottom:20px">From transcript to queryable twin</div>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-left">
+        <div class="step-num">1</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-right">
+        <div class="step-title">Raw research inputs</div>
+        <div class="step-desc">Verbatim transcripts from in-depth interviews and shopalongs. Multiple sessions per respondent where available — each session covers a different research context (brand usage, pack size behavior, in-store navigation). Audio-to-text transcripts retained in full, not summarized.</div>
+        <div class="step-analyst">Analyst does: selects respondents whose sessions span multiple use cases — depth over breadth.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-left">
+        <div class="step-num">2</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-right">
+        <div class="step-title">Cleaning &amp; annotation</div>
+        <div class="step-desc">Transcripts are cleaned for readability (filler words, crosstalk removed). Key passages are annotated by research context — what belongs to brand behavior, what belongs to store navigation, what belongs to pack-size decision-making. Contradictions and hesitations are preserved, not smoothed over.</div>
+        <div class="step-analyst">Analyst does: retains contradictions — a twin that never contradicts herself is a marketing archetype, not a real person.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-left">
+        <div class="step-num">3</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-right">
+        <div class="step-title">Persona system prompt construction</div>
+        <div class="step-desc">The cleaned, annotated transcript is structured into a system prompt encoding: who she is, how she speaks, what she has said across each research context, what she has explicitly not been asked about, and where her uncertainty lies. The prompt architecture distinguishes between recalled statements and inferred tendencies.</div>
+        <div class="step-analyst">Analyst does: separates "she said this" from "she tends to" — the distinction that makes grounding legible downstream.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-left">
+        <div class="step-num">4</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-right">
+        <div class="step-title">Validation against source</div>
+        <div class="step-desc">Twin outputs are tested against the original transcript for a set of grounded questions — questions whose answers exist verbatim in the transcript. Outputs are scored on accuracy, tone fidelity, and hallucination rate. Any output that contradicts the transcript without flagging is a failure mode that triggers a system prompt revision.</div>
+        <div class="step-analyst">Analyst does: runs a structured validation battery — this is the LLM evaluation work, not just prompting.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-left">
+        <div class="step-num">5</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-right">
+        <div class="step-title">Temperature calibration by use case</div>
+        <div class="step-desc">Temperature is not a single setting — it is mapped to use case type. Recall tasks require low temperature. Reaction tasks allow moderate extrapolation. Co-creation tasks run at higher temperature with explicit speculative framing in the output. The mapping is documented and shared with all users.</div>
+        <div class="step-analyst">Analyst does: builds the use-case-to-temperature map — the core guardrail design that protects output quality.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-left">
+        <div class="step-num">6</div>
+      </div>
+      <div class="step-right">
+        <div class="step-title">Deployed twin</div>
+        <div class="step-desc">Twin deployed with a structured prompting guide for self-serve stakeholders. Each use case has a recommended prompt format, temperature setting, and output interpretation note. Users are guided to treat grounded outputs as research recall, extrapolated outputs as directional hypotheses, and speculative outputs as ideation stimulus — not research findings.</div>
+        <div class="step-analyst">Analyst does: writes the stakeholder enablement guide — the last mile that determines whether the twin gets used well or misused.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">Temperature calibration map</div>
+  <div class="temp-legend">
+    <div class="temp-card low">
+      <div class="temp-card-label">Low — Grounded</div>
+      <div class="temp-card-val">0.2 – 0.4</div>
+      <div class="temp-card-desc">Use for recall tasks. The twin stays close to transcript language. Output is treated as research recall — closest to verbatim consumer voice. Best for brief writing and language mining.</div>
+    </div>
+    <div class="temp-card mid">
+      <div class="temp-card-label">Medium — Extrapolated</div>
+      <div class="temp-card-val">0.5 – 0.7</div>
+      <div class="temp-card-desc">Use for reaction tasks. The twin reasons from her established patterns to new stimuli. Output is flagged as directional — treat as hypothesis to probe in a real study, not confirmed preference.</div>
+    </div>
+    <div class="temp-card high">
+      <div class="temp-card-label">High — Speculative</div>
+      <div class="temp-card-val">0.8 – 1.0</div>
+      <div class="temp-card-desc">Use for co-creation. The twin imagines and invents. Output is explicitly framed as ideation stimulus. Useful for innovation territories and concept generation — not for measuring stated behavior.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 3: ASK THE TWIN
+════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-twin">
+
+  <div class="twin-layout">
+
+    <!-- PERSONA CARD -->
+    <div class="persona-card">
+      <div class="persona-card-header">
+        <div class="persona-card-avatar">M</div>
+        <div class="persona-card-name">Maya</div>
+        <div class="persona-card-meta">Digital Consumer Twin · Beauty &amp; Personal Care</div>
+      </div>
+      <div class="persona-card-body">
+        <div class="persona-trait"><span class="trait-label">Age</span><span class="trait-val">29</span></div>
+        <div class="persona-trait"><span class="trait-label">Life stage</span><span class="trait-val">Working professional, single</span></div>
+        <div class="persona-trait"><span class="trait-label">Location</span><span class="trait-val">Urban, Metro</span></div>
+        <div class="persona-trait"><span class="trait-label">Routine</span><span class="trait-val">3-step minimalist — strict about it</span></div>
+        <div class="persona-trait"><span class="trait-label">Channels</span><span class="trait-val">Drugstore for staples, online for discovery</span></div>
+        <div class="persona-trait"><span class="trait-label">Price stance</span><span class="trait-val">Mid-tier; skeptical of premium claims</span></div>
+        <div class="persona-studies">
+          <div class="persona-studies-label">Built from</div>
+          <span class="study-tag">Brand usage IDI</span>
+          <span class="study-tag">Drugstore shopalong</span>
+          <span class="study-tag">Pack size study</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q&A PANEL -->
+    <div class="qa-panel">
+
+      <div class="uc-tabs">
+        <button class="uc-tab active" onclick="setUC('brief',this)">🎙 KOL Briefing</button>
+        <button class="uc-tab" onclick="setUC('concept',this)">💡 Concept Reaction</button>
+        <button class="uc-tab" onclick="setUC('cocreate',this)">✨ Co-creation</button>
+      </div>
+
+      <div id="temp-row" class="temp-indicator"></div>
+
+      <div id="questions-list" class="questions-list"></div>
+
+      <div class="response-area" id="response-area">
+        <div class="response-empty">
+          <div class="response-empty-icon">💬</div>
+          Select a question above to hear from Maya
+        </div>
+      </div>
+
+      <div class="api-note">
+        <strong>Note on demo format:</strong> Responses shown here are pre-authored and manually validated against Maya's research transcripts. A live API implementation is straightforward but omitted to avoid rate limits and cost in a public portfolio context — the Q&amp;A set was designed to demonstrate the full range: grounded recall, extrapolated reasoning, and an out-of-scope guardrail.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 4: LIMITATIONS
+════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-limits">
+
+  <div class="honesty-box">
+    <strong>The most important thing about consumer twins</strong> is knowing what they are not. A twin that is used without guardrails — or whose outputs are presented as research findings — is worse than no twin at all. The value of this framework is as much in what it declines to answer as in what it can.
+  </div>
+
+  <div class="limits-grid">
+    <div class="limit-card cant">
+      <div class="limit-card-title">❌ What the twin cannot do</div>
+      <div class="limit-item">Represent a population — she is one person, not a segment</div>
+      <div class="limit-item">Answer questions outside her research sessions without speculative flagging</div>
+      <div class="limit-item">Replace a real study when statistical confidence is required</div>
+      <div class="limit-item">Predict future behavior with any reliability</div>
+      <div class="limit-item">Generate new memories — she knows only what the transcripts contain</div>
+    </div>
+    <div class="limit-card watch">
+      <div class="limit-card-title">⚠️ Watch for these failure modes</div>
+      <div class="limit-item">Confabulation — generating plausible-sounding but ungrounded responses</div>
+      <div class="limit-item">Character drift at high temperature — responses feel less like her</div>
+      <div class="limit-item">Leading prompts pulling responses toward the asker's hypothesis</div>
+      <div class="limit-item">Treating extrapolated outputs as recalled statements</div>
+      <div class="limit-item">Over-querying the same topic until outputs start to loop</div>
+    </div>
+    <div class="limit-card when">
+      <div class="limit-card-title">✓ When to run a real study instead</div>
+      <div class="limit-item">You need statistically representative data (N matters)</div>
+      <div class="limit-item">The question involves topics not covered in any session</div>
+      <div class="limit-item">Outputs will be used in external communications or claims</div>
+      <div class="limit-item">Stakeholders need quantified preference, not directional language</div>
+      <div class="limit-item">The twin's outputs consistently feel off — trust that signal</div>
+    </div>
+    <div class="limit-card how">
+      <div class="limit-card-title">↗ How to use outputs responsibly</div>
+      <div class="limit-item">Always label output confidence: Grounded / Extrapolated / Speculative</div>
+      <div class="limit-item">Use grounded outputs for brief writing; flag extrapolated as hypothesis</div>
+      <div class="limit-item">Treat speculative outputs as ideation stimulus only</div>
+      <div class="limit-item">Never present twin outputs as consumer research in external docs</div>
+      <div class="limit-item">Validate any output that informs a major decision with real fieldwork</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">The honest value proposition</div>
+  <div class="card">
+    <div style="font-size:13.5px;line-height:1.8;color:var(--ink)">
+      Consumer twins are most valuable as a <strong>speed layer</strong> on top of existing research — not a replacement for it. They compress the time between a business question and a directional answer from weeks to minutes, at the cost of statistical rigor. That trade-off is worth making for exploratory briefs, concept stimulus, and strategy conversations. It is not worth making for go/no-go decisions, claims development, or anything that requires knowing how many people feel a certain way.<br><br>
+      The analyst's job doesn't disappear — it shifts. Less time transcribing and summarizing, more time designing the right prompts, validating outputs against source, and knowing when to stop querying and start fielding.
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /.main -->
+
+<div class="footer">
+  Synthetic persona · Illustrative methodology · Portfolio tool only · Not for distribution
+</div>
+
+<script>
+/* ── DATA ── */
+const ucData = {
+  brief: {
+    label: 'KOL & Creative Briefing',
+    tempClass: 'low',
+    tempLabel: 'Low temperature (0.2–0.4)',
+    tempNote: 'Grounded in transcript — closest to verbatim consumer voice',
+    tempWidth: '30%',
+    questions: [
+      {
+        q: 'How does Maya describe the feeling of a moisturizer that works for her?',
+        tag: 'grounded',
+        tagLabel: 'Grounded',
+        quote: '"Parang hindi mo na-feel na may nakalagay — yung hindi ka mamumula, hindi malagkit. Basta after mo i-apply, okay na, pwede ka na lumabas."',
+        translation: '<strong>Translation:</strong> Feels like nothing\'s there — no redness, not sticky. After you put it on, you\'re done, you can go.',
+        note: '<strong>Analyst note:</strong> This is the kind of articulation you\'d lift verbatim for a KOL brief or copy platform. The "nothing there" sensation is the purchase promise — not the ingredient, not the claim.'
+      },
+      {
+        q: 'What words does Maya use when she\'s disappointed by a skincare product?',
+        tag: 'grounded',
+        tagLabel: 'Grounded',
+        quote: '"Parang niloko ka. Binayaran mo ng mahal tapos wala namang nangyari sa mukha mo after two weeks. Or worse, nagkaroon ka pa ng pimples — so sino ba talaga ang may kasalanan doon?"',
+        translation: '<strong>Translation:</strong> Feels like you were fooled. You paid a lot and nothing happened after two weeks. Or worse, you broke out — so who\'s really at fault?',
+        note: '<strong>Analyst note:</strong> "Niloko" (fooled) is the emotional frame for an efficacy miss — not disappointment, but betrayal. Relevant for claims calibration and risk communication.'
+      },
+      {
+        q: 'How does Maya describe her morning routine to her friends?',
+        tag: 'grounded',
+        tagLabel: 'Grounded',
+        quote: '"Three steps lang — facial wash, toner, sunscreen. Tapos na. Wala na kong time para sa iba. Pag sinabi nilang maraming steps, hindi ko na tinutuloy basahin."',
+        translation: '<strong>Translation:</strong> Just three steps — facial wash, toner, sunscreen. Done. I have no time for anything else. If it says many steps, I stop reading.',
+        note: '<strong>Analyst note:</strong> Complexity is a purchase barrier before trial even begins. Step count in packaging copy or a KOL script is a real friction point — not a feature.'
+      }
+    ]
+  },
+  concept: {
+    label: 'Concept & Promo Reaction',
+    tempClass: 'mid',
+    tempLabel: 'Medium temperature (0.5–0.7)',
+    tempNote: 'Extrapolated from transcript patterns — directional, not conclusive',
+    tempWidth: '60%',
+    questions: [
+      {
+        q: 'Maya sees a new toner with a "barrier repair" claim — what\'s her first reaction?',
+        tag: 'extrapolated',
+        tagLabel: 'Extrapolated',
+        quote: '"Barrier repair? Ano yun exactly? Pag hindi ko gets ang claim sa unang tingin, hindi ko na binabasa pa. Unless may before-after photo — pero kahit yun, skeptical pa rin ako. Kailangan kong marinig muna sa ibang tao bago ko subukan."',
+        translation: '<strong>Translation:</strong> Barrier repair? What does that mean exactly? If I don\'t get the claim at first glance, I stop reading. Unless there\'s a before-after — but even then, I\'m skeptical. I need to hear it from someone else first.',
+        note: '<strong>Analyst note:</strong> Claim skepticism and social proof reliance are consistent with transcript; reaction to this specific claim is inferred. Treat as directional — probe directly in next study. Social proof as a prerequisite for trial is the key takeaway.'
+      },
+      {
+        q: 'How would Maya respond to a buy-2-get-1 promo on her usual facial wash?',
+        tag: 'extrapolated',
+        tagLabel: 'Extrapolated',
+        quote: '"Depende kung yung laki ba ng bottle na kasama. Pag yung maliit, hindi na worth it — mag-istock up ka lang ng hindi mo naman mauubos agad. Pero pag yung regular size ko, bibilhin ko na agad — hindi ko na iisipin pa."',
+        translation: '<strong>Translation:</strong> Depends on which size is included. If it\'s the small one, not worth it — you\'re just stocking up on something you won\'t finish. But if it\'s my regular size, I\'d buy immediately — no second thoughts.',
+        note: '<strong>Analyst note:</strong> Pack size sensitivity is transcript-grounded; promo mechanic response is inferred from value framing. Pack size inclusion is a key variable in promo design — worth testing explicitly.'
+      },
+      {
+        q: 'A brand she trusts launches a premium refill pack — does she buy it?',
+        tag: 'extrapolated',
+        tagLabel: 'Extrapolated',
+        quote: '"Subukan ko — pero kailangan muna convincing yung packaging. Hindi pwedeng mukhang cheap yung refill pouch, kasi parang binabago nila yung feel ng brand. Pag okay yung dating, okay. Pag mukhang panggrocery lang, hindi."',
+        translation: '<strong>Translation:</strong> I\'d try it — but the packaging needs to convince me first. The refill pouch can\'t look cheap, because it changes how the brand feels. If it still feels premium, fine. If it looks like a grocery generic, no.',
+        note: '<strong>Analyst note:</strong> Brand equity sensitivity is transcript-grounded; refill-specific response is inferred. Key finding: premium cue maintenance is non-negotiable even in value-format packaging. Packaging is not a cost-cut opportunity here.'
+      }
+    ]
+  },
+  cocreate: {
+    label: 'Co-creation & Ideation',
+    tempClass: 'high',
+    tempLabel: 'High temperature (0.8–1.0)',
+    tempNote: 'Speculative — ideation stimulus only, not research findings',
+    tempWidth: '90%',
+    questions: [
+      {
+        q: 'What would Maya\'s ideal moisturizer do that her current one doesn\'t?',
+        tag: 'speculative',
+        tagLabel: 'Speculative',
+        quote: '"Sana may SPF na talaga siya — hindi na kailangan ng separate sunscreen. Tapos yung texture, kahit mainit, hindi mag-eexpire yung feel sa mukha mo by noon. At sana hindi mahal. Yun lang talaga — tatlong bagay lang, pero wala pa."',
+        translation: '<strong>Translation:</strong> I wish it already had SPF — no separate sunscreen needed. And the texture, even when it\'s hot, shouldn\'t feel expired on your face by noon. And I hope it\'s not expensive. Just three things — but nothing has all three yet.',
+        note: '<strong>Analyst note:</strong> This is Maya imagining, not recalling. Treat as co-creation input, not stated preference. The "nothing has all three yet" framing is a useful innovation brief — SPF + texture durability + accessible price as white space.'
+      },
+      {
+        q: 'If Maya could redesign how skincare is sold at the drugstore, what would she change?',
+        tag: 'speculative',
+        tagLabel: 'Speculative',
+        quote: '"Gusto ko yung may testers na hindi nakakainis i-access. Yung hindi ka mahihiyang subukan. Tapos yung staff, hindi dapat lumapit agad — hayaan mo muna akong tingnan ng mag-isa. At sana may section na para sa mga first-timers, kasi yung ngayon, nakakalito."',
+        translation: '<strong>Translation:</strong> I want testers that aren\'t annoying to access — where you\'re not embarrassed to try. And the staff, don\'t approach immediately — let me look first. And I hope there\'s a section for first-timers, because right now it\'s confusing.',
+        note: '<strong>Analyst note:</strong> Channel redesign is imaginative territory. Useful for shopper experience briefs and channel design inputs. The "first-timer section" idea points to a navigation gap worth testing in store observation research.'
+      },
+      {
+        q: 'What would make Maya recommend a skincare brand to her friends without being asked?',
+        tag: 'speculative',
+        tagLabel: 'Speculative',
+        quote: '"Pag nakita nilang nagbago talaga yung mukha ko — hindi ko na kailangang sabihin, tatanungin na nila mismo. Yun lang talaga yung pinaka-convincing. Hindi ads, hindi influencer — yung sarili mong mukha."',
+        translation: '<strong>Translation:</strong> When they see my face actually changed — I don\'t need to say anything, they\'ll ask on their own. That\'s the most convincing thing. Not ads, not influencers — your own face.',
+        note: '<strong>Analyst note:</strong> Visible results as the organic advocacy driver — inferred from efficacy centrality in transcript. Implication for WOM strategy: the medium is the face, not the content. Relevant for KOL brief framing around before/after credibility.'
+      }
+    ]
+  }
+};
+
+let currentUC = 'brief';
+let currentQ = null;
+
+const tagClasses = {
+  grounded: 'tag-grounded',
+  extrapolated: 'tag-extrapolated',
+  speculative: 'tag-speculative',
+  outofscope: 'tag-outofscope'
+};
+
+function setUC(uc, btn) {
+  currentUC = uc;
+  currentQ = null;
+  document.querySelectorAll('.uc-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTempRow();
+  renderQuestions();
+  renderEmpty();
+}
+
+function renderTempRow() {
+  const d = ucData[currentUC];
+  document.getElementById('temp-row').innerHTML = `
+    <span class="temp-pill ${d.tempClass}">${d.tempLabel}</span>
+    <div class="temp-bar-wrap"><div class="temp-bar-fill ${d.tempClass}" style="width:${d.tempWidth}"></div></div>
+    <span class="temp-note">${d.tempNote}</span>
+  `;
+}
+
+function renderQuestions() {
+  const d = ucData[currentUC];
+  document.getElementById('questions-list').innerHTML = d.questions.map((q, i) => `
+    <button class="q-btn" onclick="selectQ(${i})" id="qbtn-${i}">${q.q}</button>
+  `).join('');
+}
+
+function renderEmpty() {
+  document.getElementById('response-area').innerHTML = `
+    <div class="response-empty">
+      <div class="response-empty-icon">💬</div>
+      Select a question above to hear from Maya
+    </div>
+  `;
+}
+
+function selectQ(i) {
+  currentQ = i;
+  document.querySelectorAll('.q-btn').forEach((b, idx) => {
+    b.classList.toggle('active', idx === i);
+  });
+
+  const q = ucData[currentUC].questions[i];
+
+  // Simulate a brief "thinking" delay
+  document.getElementById('response-area').innerHTML = `
+    <div class="response-empty">
+      <div class="response-empty-icon" style="animation:pulse 0.8s infinite alternate">💭</div>
+      Maya is responding…
+    </div>
+  `;
+
+  setTimeout(() => {
+    document.getElementById('response-area').innerHTML = `
+      <div class="response-header">
+        <div class="response-who">
+          <div class="response-who-dot"></div>
+          Maya · Digital Consumer Twin
+        </div>
+        <span class="confidence-tag ${tagClasses[q.tag]}">${q.tagLabel}</span>
+      </div>
+      <div class="response-body">
+        <div class="response-quote">${q.quote}</div>
+        <div class="response-translation">${q.translation}</div>
+        <div class="analyst-note">${q.note}</div>
+      </div>
+    `;
+  }, 600);
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── INIT ── */
+renderTempRow();
+renderQuestions();
+</script>
+<style>
+@keyframes pulse { from { opacity:0.4; } to { opacity:1; } }
+</style>
+</body>
+</html>
